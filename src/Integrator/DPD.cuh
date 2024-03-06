@@ -59,10 +59,11 @@ namespace uammd{
     
     virtual void forwardTime() override {
       steps++;
-      if (steps == 1)
+      if (steps == 1){
 	for(auto forceComp: interactors){
 	  verlet->addInteractor(forceComp);
 	}
+      }
       verlet->forwardTime();
     }
     
