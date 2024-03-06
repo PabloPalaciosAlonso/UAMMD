@@ -1,3 +1,14 @@
+/*Pablo Palacios-Alonso 2024. DPD integrator module
+  
+  This module simulates particle dynamics using a Dissipative Particle Dynamics (DPD) simulation.
+  To achieve this, it employs the Verlet NVE algorithm to update the positions of the particles
+  in conjunction with an interactor that treats the typical DPD forces [1] as a UAMMD potential.
+
+
+  References:
+  [1] On the numerical treatment of dissipative particle dynamics and related systems. Leimkuhler and Shang 2015. https://doi.org/10.1016/j.jcp.2014.09.008
+*/
+
 #pragma once
 
 #include "Integrator/VerletNVE.cuh"
