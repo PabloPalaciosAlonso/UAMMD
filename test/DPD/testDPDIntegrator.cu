@@ -1,5 +1,7 @@
-/*Raul P. Pelaez 2022. Tests for the Lanczos algorithm.
-  Tests the result of sqrt(M)*v for increasingly complex matrices and vectors of several sizes.
+/* P. Palacios-Alonso 2024
+   Test of the implementation of DPDIntegrator, it will simulate a LJ gas
+   using the new DPDIntegrator and a VerletNVE integrator with the DPD potential and check
+   that the reuslts are the same  
  */
 #include <fstream>
 #include <gtest/gtest.h>
@@ -46,8 +48,7 @@ auto createIntegratorDPD(UAMMD sim){
   par.gamma = sim.par.friction;
   par.A = sim.par.strength;
   par.dt = sim.par.dt;
-  par.initVelocities=false;
-  par.L = sim.par.boxSize;
+  par.box = Box(sim.par.boxSize);
   auto dpd = make_shared<DPDIntegrator>(sim.pd,  par);
   return dpd;
 }
