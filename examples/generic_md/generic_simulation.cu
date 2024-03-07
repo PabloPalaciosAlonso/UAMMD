@@ -70,7 +70,7 @@ Which has a lot of information. From basic functionality to descriptions and ref
 #include "Integrator/Integrator.cuh"
 #include "Integrator/VerletNVE.cuh"
 #include "Integrator/VerletNVT.cuh"
-#include "Interactor/Potential/DPD.cuh"
+#include "Integrator/DPD.cuh"
 #include"Interactor/SPH.cuh"
 #include"utils/InputFile.h"
 #include <algorithm>
@@ -238,26 +238,17 @@ auto createIntegratorVerletNVE(UAMMD sim){
 }
 
 //Dissipative Particle Dynamics
-//DPD is handled by UAMMD as a VerletNVE integrator with a special short range interaction
 auto createIntegratorDPD(UAMMD sim){
-  using NVE = VerletNVE;
-  NVE::Parameters par;
+  DPDIntegrator::Parameters par;
   par.dt = sim.par.dt;
-  par.initVelocities = false;
-  auto verlet = std::make_shared<NVE>(sim.pd, par);
-  using DPD = PairForces<Potential::DPD, NeighbourList>;
-  Potential::DPD::Parameters dpd_params;
-  dpd_params.cutOff = sim.par.cutOff_dpd;
-  dpd_params.temperature = sim.par.temperature;
-  dpd_params.gamma = sim.par.gamma_dpd;
-  dpd_params.A = sim.par.A_dpd;
-  dpd_params.dt = par.dt;
-  auto pot = std::make_shared<Potential::DPD>(dpd_params);
-  DPD::Parameters params;
-  params.box = Box(sim.par.L);
-  auto pairforces = std::make_shared<DPD>(sim.pd, params, pot);
-  verlet->addInteractor(pairforces);
-  return verlet;
+  par.cutOff = sim.par.cutOff_dpd;
+  par.temperature = sim.par.temperature;
+  par.gamma = sim.par.gamma_dpd;
+  par.A = sim.par.A_dpd;
+  par.dt = par.dt;
+  par.box = Box(sim.par.L);
+  auto dpd = std::make_shared<DPDIntegrator>(sim.pd,  par);
+  return dpd;
 }
 
 //Smoothed Particle Hydrodynamics

@@ -78,30 +78,18 @@ std::shared_ptr<Integrator> createIntegratorVerletNVE(UAMMD sim){
   return std::make_shared<VerletNVE>(sim.pd, par);
 }
 
-#include "Integrator/VerletNVE.cuh"
-#include "Interactor/Potential/DPD.cuh"
-#include"Interactor/PairForces.cuh"
-//DPD is handled by UAMMD as a VerletNVE integrator with a special short range interaction
+#include "Integrator/DPD.cuh"
 std::shared_ptr<Integrator> createIntegratorDPD(UAMMD sim){
-  using NVE = VerletNVE;
-  NVE::Parameters par;
-  par.dt = 1.0;
-  par.initVelocities = false;
-  auto verlet = std::make_shared<NVE>(sim.pd, par);
-  using DPD = PairForces<Potential::DPD>;
-  Potential::DPD::Parameters dpd_params;
-  dpd_params.cutOff = 1.0;
-  dpd_params.temperature = 1.0;
-  dpd_params.gamma = 1.0;
-  dpd_params.A = 1.0;
-  dpd_params.dt = 0.1;
-  auto pot = std::make_shared<Potential::DPD>(dpd_params);
-  DPD::Parameters params;
+  DPDIntegrator::Parameters par;
+  par.cutOff = 1.0;
+  par.temperature = 1.0;
+  par.gamma = 1.0;
+  par.A = 1.0;
+  par.dt = 0.1;
   real3 L = make_real3(32,32,32);
-  params.box = Box(L);
-  auto pairforces = std::make_shared<DPD>(sim.pd, params, pot);
-  verlet->addInteractor(pairforces);
-  return verlet;
+  par.box = Box(L);
+  auto dpd = std::make_shared<DPDIntegrator>(sim.pd,  par);
+  return dpd;
 }
 
 #include "Integrator/VerletNVE.cuh"
