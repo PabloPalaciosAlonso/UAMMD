@@ -22,17 +22,15 @@ namespace uammd{
   public:
     struct Parameters{
       //VerletNVE
-      real energy = 0; //Target energy, ignored if initVelocities is false
       real dt = 0;
       bool is2D = false;
-      bool initVelocities = false;
-      
+            
       //DPD
       real cutOff;
       real gamma;
       real A;
       real temperature;
-      real3 L;
+      Box box;
     };
     
     DPDIntegrator(shared_ptr<ParticleGroup> pg, Parameters par):
@@ -40,10 +38,9 @@ namespace uammd{
       steps(0){
       //Initialize verletNVE
       VerletNVE::Parameters verletpar;
-      verletpar.energy         = par.energy;
       verletpar.dt             = par.dt;
       verletpar.is2D           = par.is2D;
-      verletpar.initVelocities = par.initVelocities; //=false?
+      verletpar.initVelocities = false;
       
       verlet = std::make_shared<VerletNVE>(pg, verletpar);      
       
@@ -57,7 +54,7 @@ namespace uammd{
       auto dpd = std::make_shared<Potential::DPD>(dpdPar);
       using PF = PairForces<Potential::DPD>;
       typename PF::Parameters pfpar;
-      pfpar.box = Box(par.L);
+      pfpar.box = par.box;
       //From the example in PairForces
       auto dpd_interactor = std::make_shared<PF>(pg, pfpar, dpd);
       verlet->addInteractor(dpd_interactor);
