@@ -92,28 +92,21 @@ std::shared_ptr<Integrator> createIntegratorDPD(UAMMD sim){
   return dpd;
 }
 
-#include "Integrator/VerletNVE.cuh"
-#include "Interactor/SPH.cuh"
-//SPH is handled by UAMMD as a VerletNVE integrator with a special interaction
+#include "Integrator/SPH.cuh"
 std::shared_ptr<Integrator> createIntegratorSPH(UAMMD sim){
-  using NVE = VerletNVE;
-  NVE::Parameters par;
-  par.dt = 0.1;
-  par.initVelocities = false;
-  auto verlet = std::make_shared<NVE>(sim.pd, par);
-  SPH::Parameters params;
+  SPHIntegrator::Parameters par;
+  par.dt  = 0.1;
   real3 L = make_real3(32,32,32);
-  params.box = Box(L);
+  par.box = Box(L);
   //Pressure for a given particle "i" in SPH will be computed as gasStiffness·(density_i - restDensity)
   //Where density is computed as a function of the masses of the surroinding particles
   //Particle mass starts as 1, but you can change this in customizations.cuh
-  params.support = 2.4;   //Cut off distance for the SPH kernel
-  params.viscosity = 1.0;   //Environment viscosity
-  params.gasStiffness = 1.0;
-  params.restDensity = 1.0;
-  auto sph = std::make_shared<SPH>(sim.pd, params);
-  verlet->addInteractor(sph);
-  return verlet;
+  par.support = 2.4;   //Cut off distance for the SPH kernel
+  par.viscosity = 1.0;   //Environment viscosity
+  par.gasStiffness = 1.0;
+  par.restDensity = 1.0;
+  auto sph = std::make_shared<SPHIntegrator>(sim.pd, par);
+  return sph;
 }
 
 #include "Integrator/Hydro/ICM.cuh"

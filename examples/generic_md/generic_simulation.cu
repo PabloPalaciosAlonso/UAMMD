@@ -61,17 +61,17 @@ Which has a lot of information. From basic functionality to descriptions and ref
 #include"Interactor/AngularBondedForces.cuh"
 #include"Interactor/TorsionalBondedForces.cuh"
 #include"Integrator/BrownianDynamics.cuh"
-#include "Integrator/BDHI/FIB.cuh"
-#include "Integrator/Hydro/ICM.cuh"
-#include "Integrator/BDHI/BDHI_EulerMaruyama.cuh"
+#include"Integrator/BDHI/FIB.cuh"
+#include"Integrator/Hydro/ICM.cuh"
+#include"Integrator/BDHI/BDHI_EulerMaruyama.cuh"
 #include"Integrator/BDHI/BDHI_PSE.cuh"
 #include"Integrator/BDHI/BDHI_FCM.cuh"
 #include"Interactor/SpectralEwaldPoisson.cuh"
-#include "Integrator/Integrator.cuh"
-#include "Integrator/VerletNVE.cuh"
-#include "Integrator/VerletNVT.cuh"
-#include "Integrator/DPD.cuh"
-#include"Interactor/SPH.cuh"
+#include"Integrator/Integrator.cuh"
+#include"Integrator/VerletNVE.cuh"
+#include"Integrator/VerletNVT.cuh"
+#include"Integrator/DPD.cuh"
+#include"Integrator/SPH.cuh"
 #include"utils/InputFile.h"
 #include <algorithm>
 #include <fstream>
@@ -253,23 +253,20 @@ auto createIntegratorDPD(UAMMD sim){
 
 //Smoothed Particle Hydrodynamics
 auto createIntegratorSPH(UAMMD sim){
-  using NVE = VerletNVE;
-  NVE::Parameters par;
+  SPHIntegrator::Parameters par;
   par.dt = sim.par.dt;
+  par.box = Box(sim.par.L);
   par.initVelocities = false;
-  auto verlet = std::make_shared<NVE>(sim.pd, par);
-  SPH::Parameters params;
-  params.box = Box(sim.par.L);
+
   //Pressure for a given particle "i" in SPH will be computed as gasStiffness·(density_i - restDensity)
   //Where density is computed as a function of the masses of the surroinding particles
   //Particle mass starts as 1, but you can change this in customizations.cuh
-  params.support = sim.par.support_sph;   //Cut off distance for the SPH kernel
-  params.viscosity = sim.par.viscosity;   //Environment viscosity
-  params.gasStiffness = sim.par.gasStiffness_sph;
-  params.restDensity = sim.par.restDensity_sph;
-  auto sph = std::make_shared<SPH>(sim.pd, params);
-  verlet->addInteractor(sph);
-  return verlet;
+  par.support = sim.par.support_sph;   //Cut off distance for the SPH kernel
+  par.viscosity = sim.par.viscosity;   //Environment viscosity
+  par.gasStiffness = sim.par.gasStiffness_sph;
+  par.restDensity = sim.par.restDensity_sph;
+  auto sph = std::make_shared<SPHIntegrator>(sim.pd, par);
+  return sph;
 }
 
 //Creates a triply periodic Brownian Dynamics with Hydrodynamic Interactions integration module
